@@ -181,6 +181,37 @@ p.groupnote { margin: 0 0 12px; font-family: var(--ui); font-size: 13.5px; color
   <div class="wrap">
     <aside class="panel" aria-label="Réglages">
       <div class="box">
+        <div class="lbl">Trier</div>
+        <select id="sort" aria-label="Trier">
+          <option value="qu">Les plus recommandées</option>
+          <option value="fs">Points Falstaff</option>
+          <option value="gm">Note Gault&amp;Millau</option>
+          <option value="ta">Note Tripadvisor</option>
+          <option value="gd">Nombre de guides qui la citent</option>
+          <option value="ll">Score La Liste</option>
+          <option value="nm">Nom</option>
+          <option value="bz">Arrondissement (Bezirk)</option>
+          <option value="sd">Étoiles Michelin</option>
+          <option value="pa">Prix</option>
+        </select>
+        <div style="display:grid;gap:12px;margin-top:12px">
+          <div><div class="lbl" style="margin-bottom:6px">Végétarien</div>
+            <select id="fveg" aria-label="Option végétarienne">
+              <option value="">Peu importe</option>
+              <option value="any">Au moins une option végétarienne</option>
+              <option value="ded">Menu dédié ou 100 % végétal</option>
+            </select></div>
+          <div><div class="lbl" style="margin-bottom:6px">Poisson sans viande</div>
+            <select id="ffish" aria-label="Option poisson sans viande">
+              <option value="">Peu importe</option>
+              <option value="any">Au moins un plat de poisson</option>
+              <option value="ded">Menu poisson ou pescétarien dédié</option>
+            </select></div>
+        </div>
+        <input type="search" id="q" placeholder="Nom, quartier, cuisine, plat…" aria-label="Rechercher">
+      </div>
+
+      <div class="box">
         <div class="lbl">Budget</div>
         <div class="row">
           <div class="seg" role="group" aria-label="Unité">
@@ -209,23 +240,6 @@ p.groupnote { margin: 0 0 12px; font-family: var(--ui); font-size: 13.5px; color
       </div>
 
       <div class="box">
-        <div class="lbl">Trier</div>
-        <select id="sort" aria-label="Trier">
-          <option value="qu">Les plus recommandées</option>
-          <option value="fs">Points Falstaff</option>
-          <option value="gm">Note Gault&amp;Millau</option>
-          <option value="ta">Note Tripadvisor</option>
-          <option value="gd">Nombre de guides qui la citent</option>
-          <option value="ll">Score La Liste</option>
-          <option value="nm">Nom</option>
-          <option value="bz">Arrondissement (Bezirk)</option>
-          <option value="sd">Étoiles Michelin</option>
-          <option value="pa">Prix</option>
-        </select>
-        <input type="search" id="q" placeholder="Nom, quartier, cuisine, plat…" aria-label="Rechercher">
-      </div>
-
-      <div class="box">
         <div class="lbl">Genre de table</div>
         <div class="chips" id="fcat"></div>
         <label class="chk"><input type="checkbox" id="mixstars"> Mêler les étoilés à la liste principale</label>
@@ -235,18 +249,6 @@ p.groupnote { margin: 0 0 12px; font-family: var(--ui); font-size: 13.5px; color
         <details class="more" id="moreF">
           <summary>Plus de filtres</summary>
           <div style="display:grid;gap:12px">
-            <div><div class="lbl" style="margin-bottom:6px">Végétarien</div>
-              <select id="fveg" aria-label="Option végétarienne">
-                <option value="">Peu importe</option>
-                <option value="any">Au moins une option végétarienne</option>
-                <option value="ded">Menu dédié ou 100 % végétal</option>
-              </select></div>
-            <div><div class="lbl" style="margin-bottom:6px">Poisson sans viande</div>
-              <select id="ffish" aria-label="Option poisson sans viande">
-                <option value="">Peu importe</option>
-                <option value="any">Au moins un plat de poisson</option>
-                <option value="ded">Menu poisson ou pescétarien dédié</option>
-              </select></div>
             <div><div class="lbl" style="margin-bottom:6px">Recommandée par</div><div class="chips" id="fguide"></div></div>
             <div><div class="lbl" style="margin-bottom:6px">Distinctions</div><div class="chips" id="fdist"></div></div>
             <div><div class="lbl" style="margin-bottom:6px">Ce qui manque</div><div class="chips" id="fmiss"></div></div>
@@ -583,7 +585,7 @@ let qt; $("q").addEventListener("input", (e) => { clearTimeout(qt); qt = setTime
   $("mcount").textContent = `${DATA.length} adresses, dont ${nOpen} ouvertes`;
   $("wine").checked = st.wine; $("winekeep").checked = st.winekeep; $("mixstars").checked = st.mix;
   $("showclosed").checked = st.closed; $("sort").value = st.sort; $("fveg").value = st.veg; $("ffish").value = st.fish || "";
-  if (st.veg || st.fish || st.guides.length || st.dist.length || st.miss.length) $("moreF").open = true;
+  if (st.guides.length || st.dist.length || st.miss.length) $("moreF").open = true;
   $("rmin").value = eurToPos(st.min); $("rmax").value = isFinite(st.max) ? eurToPos(st.max) : 1000;
   render();
 })();
