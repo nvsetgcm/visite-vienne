@@ -69,6 +69,7 @@ aside.panel { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 56px);
 .quick.ghost { background: transparent; border-color: var(--line); }
 label.chk { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; }
 label.chk input { margin-top: 3px; accent-color: var(--loden); }
+.catnote { font-size: 13.5px; line-height: 1.45; color: var(--muted); margin: 10px 0 0; }
 label.chk.sub { padding-left: 24px; color: var(--muted); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chips button { font: inherit; font-size: 13px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 4px 10px; cursor: pointer; }
@@ -157,7 +158,7 @@ p.groupnote { margin: 0 0 12px; font-family: var(--ui); font-size: 13.5px; color
   <div class="wrap">
     <div class="eyebrow" id="heye">Restaurants · relevés du <span id="mdate"></span></div>
     <h1 id="htitle">Visite de Vienne</h1>
-    <p class="lede" id="hlede">Bonnes tables à prix justes : Beisl, Heurigen, cafés viennois, maisons historiques et cuisine du monde, toutes recommandées par au moins un guide ou un critique, avec le prix d'un vrai dîner relevé à la source. Les étoilés sont regroupés à la fin, par curiosité.</p>
+    <p class="lede" id="hlede">Bonnes tables à prix justes : bistrots viennois (Beisl), guinguettes de vignerons (Heurigen), cafés viennois, maisons historiques et cuisine du monde, toutes recommandées par au moins un guide ou un critique, avec le prix d'un vrai dîner relevé à la source. Les étoilés sont regroupés à la fin, par curiosité.</p>
     <div class="meta" id="hmeta"><span id="mcount"></span><span>Prix d'un dîner, hors boissons</span></div>
   </div>
 </header>
@@ -242,6 +243,7 @@ p.groupnote { margin: 0 0 12px; font-family: var(--ui); font-size: 13.5px; color
       <div class="box">
         <div class="lbl">Genre de table</div>
         <div class="chips" id="fcat"></div>
+        <p class="catnote"><strong>Bistrot viennois</strong> : en allemand <em>Beisl</em> (bistrot de quartier) ou <em>Gasthaus</em> (auberge). Salle simple, service sans façon et la cuisine viennoise de tous les jours : le meilleur endroit pour la découvrir.<br><strong>Guinguette à vin</strong> (<em>Heuriger</em>, pluriel <em>Heurigen</em>) : taverne de vigneron aux portes de la ville, vin de l'année et buffet froid.</p>
         <label class="chk"><input type="checkbox" id="mixstars"> Mêler les étoilés à la liste principale</label>
       </div>
 
@@ -267,6 +269,13 @@ p.groupnote { margin: 0 0 12px; font-family: var(--ui); font-size: 13.5px; color
         <h2>Comment lire cette liste</h2>
         <h3>Le choix des adresses</h3>
         <p>Le critère est le rapport qualité-prix, pas le prix le plus bas : chaque adresse est recommandée par au moins un guide ou un critique (Guide Michelin, Falstaff, Gault&amp;Millau, Lonely Planet, office du tourisme de Vienne…). On y trouve donc aussi bien un Beisl simple qu'une maison historique plus chère, si elle vaut ce prix.</p>
+        <h3>Les genres de table, en français</h3>
+        <ul>
+          <li><strong>Bistrots viennois (Beisl, Gasthaus)</strong> : le <em>Beisl</em> (prononcer « baïzl ») est le bistrot de quartier propre à Vienne ; le <em>Gasthaus</em> est l'auberge traditionnelle, souvent tenue par la même famille depuis des générations. Boiseries, nappes à carreaux, service direct, portions généreuses. On y mange les classiques : <em>Wiener Schnitzel</em> (escalope de veau panée), <em>Tafelspitz</em> (pot-au-feu de bœuf servi avec son bouillon, raifort aux pommes et sauce à la ciboulette), <em>Gulasch</em> (ragoût de bœuf au paprika), <em>Backhendl</em> (poulet pané), <em>Knödel</em> (boulettes de pain ou de pâte), et en dessert <em>Kaiserschmarrn</em> (crêpe épaisse émiettée et caramélisée) ou <em>Apfelstrudel</em> (strudel aux pommes). C'est la porte d'entrée vers la vraie cuisine viennoise.</li>
+          <li><strong>Guinguettes à vin (Heurigen)</strong> : un <em>Heuriger</em> est une taverne de vigneron, surtout à Grinzing, Stammersdorf ou Nussdorf, où l'on boit le vin de la propriété avec un buffet froid ou chaud (charcuterie, rôti de porc, fromages, tartinades).</li>
+          <li><strong>Tables historiques</strong> : maisons anciennes et réputées, souvent plus chères, retenues quand elles valent leur prix.</li>
+          <li><strong>Cafés viennois</strong> : les grands cafés (<em>Kaffeehaus</em>), où l'on sert aussi des plats viennois et des pâtisseries.</li>
+        </ul>
         <h3>L'ordre de la liste</h3>
         <p>Par défaut, les adresses sont classées par recommandation : la moyenne des critiques disponibles (points Falstaff, note Gault&amp;Millau, note Tripadvisor quand elle repose sur au moins 20 avis, pondérée par leur nombre), plus un petit bonus pour une distinction Michelin et pour chaque guide qui cite l'adresse. Une adresse sans aucune note se place au milieu. Le curseur de budget ne fait que filtrer ; il ne change pas l'ordre.</p>
         <h3>Le prix retenu</h3>
@@ -279,7 +288,7 @@ p.groupnote { margin: 0 0 12px; font-family: var(--ui); font-size: 13.5px; color
         <p>Quand la carte officielle n'est pas en ligne, le prix vient d'un guide ou d'un annuaire de cartes, marqué « Non vérifié ». S'il date d'avant 2026, il est relevé pour l'inflation (+4 % pour 2025, +8 % pour 2024, +15 % pour 2023, +25 % pour 2022). Si seul le plat est connu, on ajoute une soupe et un dessert au prix médian des cartes officielles relevées (7,50 € et 8,20 €). Ces prix sont précédés de « ≈ ».</p>
         <p>Les menus du midi (Mittagsmenü), souvent bien moins chers, ne sont pas retenus mais sont parfois signalés en remarque. Les cartes changent avec les saisons : quelques euros d'écart sont normaux.</p>
         <h3>Sources</h3>
-        <p>Liste de base : sélection du Guide Michelin Autriche 2026 (publiée le 18 mars 2026), complétée par des tables historiques, des Beisl, des Heurigen et des adresses abordables recommandées par Le Routard, le Petit Futé, Lonely Planet, Falstaff, Falter et l'office du tourisme de Vienne. Critiques : Gault&amp;Millau Autriche (note sur 20 et toques), Falstaff (points sur 100), La Liste. Avis clients : Tripadvisor, TheFork, OpenTable ; les notes Google ne sont pas recopiées, seul un lien vers la fiche Google Maps est donné. Les sites qui génèrent automatiquement des fiches de restaurants ont été écartés.</p>
+        <p>Liste de base : sélection du Guide Michelin Autriche 2026 (publiée le 18 mars 2026), complétée par des tables historiques, des bistrots viennois (Beisl), des guinguettes à vin (Heurigen) et des adresses abordables recommandées par Le Routard, le Petit Futé, Lonely Planet, Falstaff, Falter et l'office du tourisme de Vienne. Critiques : Gault&amp;Millau Autriche (note sur 20 et toques), Falstaff (points sur 100), La Liste. Avis clients : Tripadvisor, TheFork, OpenTable ; les notes Google ne sont pas recopiées, seul un lien vers la fiche Google Maps est donné. Les sites qui génèrent automatiquement des fiches de restaurants ont été écartés.</p>
         <h3>Limites</h3>
         <p>L'étoile verte Michelin a été supprimée par Michelin le 18 mai 2026 : elle n'est mentionnée que pour l'édition 2026 où elle existait encore. Un avis Tripadvisor sous 20 avis est marqué « peu fiable ». Une donnée absente est indiquée comme telle plutôt que devinée.</p>
       </div>
@@ -292,8 +301,8 @@ const DATA = [{"id": 0, "name": "Amador", "batch": "A", "cat": "etoile", "stars"
 const META = {"n": 199, "date": "31 octobre – 1er novembre 2026"};
 
 const CATS = [
-  ["beisl", "Beisl & Gasthaus"], ["iconique", "Tables historiques"], ["cafe", "Cafés viennois"],
-  ["heuriger", "Heurigen"], ["abordable", "Cuisine du monde"], ["veg", "Végétarien & végétal"], ["bib", "Bib Gourmand"],
+  ["beisl", "Bistrots viennois (Beisl, Gasthaus)"], ["iconique", "Tables historiques"], ["cafe", "Cafés viennois"],
+  ["heuriger", "Guinguettes à vin (Heurigen)"], ["abordable", "Cuisine du monde"], ["veg", "Végétarien & végétal"], ["bib", "Bib Gourmand"],
   ["selection", "Sélection Michelin"], ["etoile", "Étoilés"]
 ];
 const MISS = [["src", "Source non officielle"], ["acc", "Accord vins manquant"], ["px", "Prix manquant"]];
