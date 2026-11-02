@@ -70,6 +70,11 @@ aside.panel { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 56px);
 label.chk { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; }
 label.chk input { margin-top: 3px; accent-color: var(--loden); }
 .budgetnote { font-size: 13px; font-style: italic; line-height: 1.4; color: var(--muted); margin: 4px 0 10px; }
+.locbox .row2 { display: flex; gap: 8px; margin-top: 8px; }
+.locbox .row2 input { flex: 1; min-width: 0; }
+.locbox .locst { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
+.locbox .locst button { margin-left: 6px; }
+.locbox input[type=range] { width: 100%; accent-color: var(--loden); margin-top: 10px; }
 .catnote { font-size: 13.5px; line-height: 1.45; color: var(--muted); margin: 10px 0 0; }
 label.chk.sub { padding-left: 24px; color: var(--muted); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -183,6 +188,7 @@ p.groupnote { margin: 0 0 12px; font-family: var(--ui); font-size: 13.5px; color
 <main id="p-rest">
   <div class="wrap">
     <aside class="panel" aria-label="Réglages">
+      <div class="box locbox" id="locR"></div>
       <div class="box">
         <div class="lbl">Trier</div>
         <select id="sort" aria-label="Trier">
@@ -195,6 +201,7 @@ p.groupnote { margin: 0 0 12px; font-family: var(--ui); font-size: 13.5px; color
           <option value="nm">Nom</option>
           <option value="bz">Arrondissement (Bezirk)</option>
           <option value="sd">Étoiles Michelin</option>
+          <option value="pr">Les plus proches (position indiquée)</option>
           <option value="pa">Prix</option>
         </select>
         <div style="display:grid;gap:12px;margin-top:12px">
@@ -281,6 +288,8 @@ p.groupnote { margin: 0 0 12px; font-family: var(--ui); font-size: 13.5px; color
         </ul>
         <h3>L'ordre de la liste</h3>
         <p>Par défaut, les adresses sont classées par recommandation : la moyenne des critiques disponibles (points Falstaff, note Gault&amp;Millau, note Tripadvisor quand elle repose sur au moins 20 avis, pondérée par leur nombre), plus un petit bonus pour une distinction Michelin et pour chaque guide qui cite l'adresse. Une adresse sans aucune note se place au milieu. Le curseur de prix ne fait que filtrer ; il ne change pas l'ordre.</p>
+        <h3>La distance</h3>
+        <p>Après avoir indiqué votre position (« Me localiser ») ou une adresse, chaque fiche affiche le temps à pied estimé : distance à vol d'oiseau majorée de 30 % pour suivre les rues, à 4,8 km/h. Les transports en commun ne sont pas pris en compte. La position reste dans votre navigateur ; une adresse tapée est envoyée au service de cartes OpenStreetMap pour être localisée.</p>
         <h3>Le prix retenu</h3>
         <p>Pour chaque adresse, le prix d'un dîner par personne, hors boissons. Quand la maison sert un menu le soir, c'est le menu complet du soir le moins cher (les menus plus longs sont cités dans la fiche). Quand elle sert à la carte, c'est un dîner type : une soupe (ou l'entrée la moins chère), le plat phare et le dessert le moins cher. Le plat phare est le Wiener Schnitzel de veau quand il existe, sinon la spécialité de la maison. Le mode « Plat phare seul » ne compte que ce plat.</p>
         <h3>Fiabilité</h3>
@@ -351,6 +360,58 @@ function gloss(t) {
     done.add(k); return `${m} (${GLOSS[k]})`;
   });
 }
+const COORDS = {"Amador": [48.253805, 16.358767], "Steirereck im Stadtpark": [48.204433, 16.381373], "Silvio Nickol Gourmet Restaurant": [48.205717, 16.376848], "Konstantin Filippou": [48.21081, 16.37979], "Mraz & Sohn": [48.231364, 16.376063], "Doubek": [48.213073, 16.34941], "[aend]": [48.189646, 16.340853], "Addiert": [48.214873, 16.372688], "APRON": [48.199568, 16.377053], "Edvard": [48.216366, 16.368659], "Esszimmer - Everybody's Darling": [48.210982, 16.371832], "Glasswing by Alexandru Simon": [48.201651, 16.371009], "Herzig": [48.20008, 16.316984], "JOLA": [48.213126, 16.371496], "OPUS": [48.20105, 16.372834], "Pramerl & the Wolf": [48.222047, 16.364902], "TIAN": [48.205263, 16.374529], "Z'SOM": [48.197536, 16.371992], "Chez Bernard": [48.198366, 16.350655], "LOLA": [48.215529, 16.370397], "MAST Weinbistro": [48.225058, 16.361546], "Meierei im Stadtpark": [48.204433, 16.381373], "Mochi": [48.213524, 16.381682], "Woracziczky": [48.18929, 16.353109], "Rosi": [48.186275, 16.322034], "Gasthaus Tante Liesl": [48.220107, 16.364149], "TIAN Bistro am Spittelberg": [48.202962, 16.354853], "Atelier 7 Brasserie": [48.207342, 16.377088], "Beef & Glory": [48.211811, 16.34886], "Beletage Zum Schwarzen Kameel": [48.209995, 16.368317], "Buxbaum": [48.209893, 16.376434], "Cafe Kandl": [48.202711, 16.338167], "Das Kraus": [48.218905, 16.378032], "Das Loft": [48.21272, 16.37979], "das weinberg": [48.230416, 16.327722], "DiningRuhm": [48.19045, 16.364625], "Eckel": [48.246988, 16.333483], "Edlingers Tempel": [48.21581, 16.387944], "Fabios": [48.209968, 16.36981], "Fuhrmann": [48.210786, 16.347924], "Gasthaus Stern": [48.171242, 16.417214], "HAUSBAR Wien": [48.200733, 16.371814], "Kommod": [48.209103, 16.348894], "KUTSCH": [48.223823, 16.343954], "Kutschker 44": [48.226739, 16.344873], "LABSTELLE": [48.209646, 16.374714], "lara": [48.212724, 16.370262], "Le Salzgries Paris": [48.212033, 16.373299], "Le Sept": [48.207342, 16.377088], "Léontine": [48.198751, 16.384024], "Liebsteinsky": [48.202882, 16.375558], "Mama Konstantina": [48.235601, 16.353033], "Meissl & Schadn": [48.20232, 16.374968], "O boufés": [48.21081, 16.37979], "Plachutta": [48.207548, 16.378755], "Reznicek": [48.228243, 16.357502], "Rote Bar": [48.204, 16.369711], "SHIKI Japanese Cuisine": [48.204114, 16.371088], "SHIKI Omakase": [48.203752, 16.372429], "Skopik & Lohn": [48.220165, 16.376648], "Trattoria Martinelli": [48.21127, 16.364942], "Vestibül": [48.209834, 16.361215], "Weibel's Wirtshaus": [48.207676, 16.375971], "Zum weissen Rauchfangkehrer": [48.206956, 16.372413], "Figlmüller Wollzeile": [48.209323, 16.374614], "Figlmüller Bäckerstraße": [48.209295, 16.375525], "Lugeck": [48.209696, 16.375148], "Zum Schwarzen Kameel": [48.209995, 16.368317], "Griechenbeisl": [48.210746, 16.377265], "Zwölf-Apostelkeller": [48.209821, 16.375731], "Esterhazykeller": [48.210083, 16.367403], "Gmoakeller": [48.200431, 16.378623], "Schweizerhaus": [48.213921, 16.401556], "Salm Bräu": [48.19641, 16.381252], "Café Central": [48.210367, 16.365387], "Café Landtmann": [48.211562, 16.36145], "Café Sperl": [48.199838, 16.36117], "Café Prückel": [48.207608, 16.380417], "Café Diglas": [48.208646, 16.375267], "Café Sacher Wien": [48.203876, 16.369789], "Ofenloch": [48.210901, 16.369776], "Gösser Bierklinik": [48.210523, 16.369604], "Gasthaus Reinthaler (Gluckgasse)": [48.205502, 16.369044], "Augustinerkeller Bitzinger": [48.204726, 16.36837], "Zu den drei Hacken": [48.206229, 16.375884], "Leupold's Kupferdachl": [48.212969, 16.363125], "Pürstner": [48.207067, 16.376308], "Café Museum": [48.201437, 16.367666], "Wiener Rathauskeller": [48.210826, 16.356573], "Gasthaus Pöschl": [48.206708, 16.373887], "Gasthaus Wolf": [48.192881, 16.364715], "Zum Alten Fassl": [48.191561, 16.36042], "Gasthaus Ubl": [48.196393, 16.362509], "Wirtshaus Schilling": [48.204214, 16.341317], "Pichlmaiers zum Herkner": [48.23345, 16.291008], "Dinglstedt 3": [48.192912, 16.336846], "Gasthaus Appiano": [48.213459, 16.363814], "Grünauer": [48.203355, 16.347451], "Haas Beisl": [48.192527, 16.360328], "Gasthaus Seidl": [48.196908, 16.387059], "Glacis Beisl": [48.20336, 16.357219], "Café Anzengruber": [48.197781, 16.3645], "Rudis Beisl": [48.18743, 16.363902], "Gasthaus Wickerl": [48.220828, 16.360866], "Zum Scherer": [48.211595, 16.369673], "Witwe Bolte": [48.203281, 16.355586], "Gasthaus Pfudl": [48.208238, 16.378276], "Gasthaus Möslinger": [48.218666, 16.399524], "Zum finsteren Stern": [48.211092, 16.369107], "Gasthaus Grünspan": [48.214479, 16.301559], "Gasthaus Wratschko": [48.205347, 16.352938], "Huth Gastwirtschaft": [48.204347, 16.375353], "Gastwirtschaft Steman": [48.195351, 16.349197], "10er Marie": [48.214267, 16.308682], "Mayer am Pfarrplatz": [48.255131, 16.358983], "Zawodsky": [48.253741, 16.330884], "Wieninger am Nussberg": [48.267827, 16.347526], "Fuhrgassl-Huber": [48.251313, 16.301409], "Hengl-Haselbrunner": [48.247454, 16.34826], "Schübel-Auer": [48.25851, 16.362233], "Neni am Naschmarkt": [48.19818, 16.362622], "Umarfisch": [48.19818, 16.362622], "Swing Kitchen": [48.211091, 16.37893], "Disco Volante": [48.191417, 16.347516], "Pizza Mari'": [48.219296, 16.376998], "Ra'mien": [48.200207, 16.361691], "Ulrich": [48.204094, 16.353807], "Motto am Fluss": [48.212084, 16.377837], "Ramasuri": [48.213743, 16.382391], "Mamamon": [48.209465, 16.34376], "Hansen": [48.215125, 16.366011], "Kent": [48.212722, 16.336264], "Habibi & Hawara": [48.202869, 16.393512], "Tewa am Naschmarkt": [48.19818, 16.362622], "Gasthaus Wild": [48.210622, 16.389834], "Zum Friedensrichter": [48.218192, 16.372947], "Gasthaus Rebhuhn": [48.2187, 16.364046], "Beim Czaak": [48.209842, 16.378819], "Meixners Gastwirtschaft": [48.174662, 16.380226], "Plachuttas Gasthaus zur Oper": [48.203574, 16.371137], "Wirtschaft am Markt": [48.180568, 16.333294], "Rasthaus Hirschgstemm": [48.171205, 16.203432], "Bastei Beisl": [48.206578, 16.377848], "Waldviertlerhof": [48.193725, 16.358572], "Am Nordpol 3": [48.226685, 16.381911], "Praterwirt": [48.215976, 16.385981], "Zum Roten Bären": [48.219469, 16.366796], "575 Sagmeister": [48.193041, 16.401997], "Pomali": [48.196051, 16.31929], "Specht": [48.208983, 16.376307], "Pfarrwirt": [48.254379, 16.359152], "Brezl Gwölb": [48.211801, 16.368659], "Wirtshaus Zattl": [48.212969, 16.363125], "Schreiners": [48.201626, 16.339075], "Café Frauenhuber": [48.205727, 16.372294], "Salonplafond": [48.207878, 16.381935], "Brösl": [48.219627, 16.403693], "Edlmoser": [48.148524, 16.259669], "Heuriger Wieninger (Stammersdorf)": [48.301352, 16.414327], "Weingut Walter Wien": [48.302159, 16.386691], "Helmut Krenek am Weingut Göbel": [48.310402, 16.401162], "Wailand": [48.257898, 16.360209], "Der Hirt": [48.272077, 16.342622], "Buschenschank Wolff": [48.250373, 16.307671], "Hans & Fritz am Steinberg": [48.262443, 16.335473], "Kierlinger": [48.25856, 16.362445], "Buschenschank in Residence (Jutta Ambrositsch)": [48.256323, 16.343709], "Weinstube Josefstadt": [48.208602, 16.350673], "Weingut Christ": [48.277733, 16.406962], "Wrenkh": [48.20981, 16.372722], "Lebenbauer": [48.211621, 16.363499], "Landia": [48.200402, 16.347655], "Hollerei": [48.1855, 16.324848], "Casino Restaurant": [48.204573, 16.370849], "Grüne Bar": [48.204031, 16.369979], "Oak-107": [48.203656, 16.373871], "Pastamara - Bar con Cucina": [48.202414, 16.376236], "Heunisch und Erben": [48.204981, 16.387836], "KIAS Restaurant": [48.198631, 16.358044], "Collina am Berg": [48.203153, 16.355423], "Stomach": [48.223251, 16.365634], "Zur Goldenen Kugel": [48.218607, 16.350951], "Stromwärts": [48.22338, 16.365751], "DasDrittl": [48.219085, 16.359342], "Porzellan": [48.219244, 16.36445], "Aspic": [48.21584, 16.356894], "Kim kocht": [48.221903, 16.354647], "Ragusa": [48.218293, 16.36218], "Café Stein": [48.215642, 16.361051], "Bierheuriger zum Gangl": [48.215324, 16.352555], "Herbeck Neue Gastwirtschaft": [48.232681, 16.317342], "Meierei Diglas im Türkenschanzpark": [48.234252, 16.331668], "Edelhof": [48.228315, 16.344975], "Zum Gemütlichen Weinhauser": [48.229933, 16.331425], "Martinsschlössl": [48.219173, 16.340312], "Wilder Mann": [48.2253, 16.346495], "Takan's Fischrestaurant": [48.22835, 16.343486], "Paul & Worthmann": [48.224507, 16.344362], "Kunsthistorisches Museum": [48.203739, 16.361782], "Château de Schönbrunn (Grand Tour)": [48.184989, 16.311568], "Belvedere supérieur": [48.191502, 16.381664], "Appartements impériaux, Musée Sisi et Collection d'argenterie": [48.206329, 16.365626], "Albertina": [48.204636, 16.368261], "Salle d'apparat de la Bibliothèque nationale (Prunksaal)": [48.206525, 16.367503], "Trésor impérial (Kaiserliche Schatzkammer)": [48.20674, 16.365846], "Leopold Museum": [48.20259, 16.359067], "Naturhistorisches Museum": [48.205269, 16.359755], "Sécession": [48.200497, 16.365768], "Wien Museum Karlsplatz": [48.199213, 16.373069], "Kunst Haus Wien – Musée Hundertwasser": [48.200079, 16.366407], "MAK – Musée des arts appliqués": [48.20742, 16.381507], "Haus der Musik": [48.203792, 16.373155], "Musée juif de Vienne": [48.20713, 16.369293], "Mozarthaus Vienna": [48.208218, 16.374933], "Heeresgeschichtliches Museum": [48.18426, 16.388979], "Sigmund Freud Museum": [48.218659, 16.363054], "Belvedere inférieur et Orangerie": [48.197032, 16.379645], "Technisches Museum Wien": [48.190921, 16.318035], "mumok": [48.20374, 16.357833], "Kaiserliche Wagenburg": [48.18638, 16.309354], "Haus der Geschichte Österreich": [48.205064, 16.364843], "Beethoven Museum": [48.254728, 16.356234], "Hofmobiliendepot – Möbel Museum Wien": [48.198706, 16.34705], "Klimt Villa": [48.188556, 16.283058], "Dom Museum Wien": [48.208683, 16.374153], "Kunsthalle Wien": [48.202973, 16.357972], "Uhrenmuseum (musée de l'horlogerie)": [48.210857, 16.369329], "Bestattungsmuseum (musée des pompes funèbres)": [48.154164, 16.440257], "Musée des globes et musée de l'espéranto": [48.209351, 16.365327], "Cathédrale Saint-Étienne (Stephansdom)": [48.208492, 16.373127], "Ruprechtskirche": [48.211991, 16.374394], "Maria am Gestade": [48.212866, 16.370658], "Minoritenkirche": [48.209504, 16.363834], "Hofburg et Michaelertrakt": [48.207307, 16.366707], "Peterskirche": [48.209437, 16.370011], "Karlskirche": [48.198279, 16.371895], "Église des Jésuites (Universitätskirche)": [48.208736, 16.377371], "Église des Piaristes Maria Treu": [48.210586, 16.34923], "Belvedere (palais)": [48.185797, 16.383849], "Château de Schönbrunn": [48.184989, 16.311568], "Palais Liechtenstein (palais d'été)": [48.222625, 16.359599], "Opéra d'État (Staatsoper)": [48.203286, 16.369194], "Votivkirche": [48.215415, 16.35914], "Hôtel de ville (Rathaus)": [48.210826, 16.356573], "Parlement": [48.208087, 16.358465], "Burgtheater": [48.210337, 16.361478], "Université de Vienne (bâtiment principal)": [48.209894, 16.36049], "Musées jumeaux (KHM et NHM)": [48.20451, 16.360896], "Musikverein": [48.200486, 16.372725], "Bourse (Börse)": [48.215297, 16.366322], "Palais Ferstel et Café Central": [48.210897, 16.365223], "Pavillons Otto Wagner de la Karlsplatz": [48.200275, 16.370266], "Majolikahaus et Linke Wienzeile 38": [48.197477, 16.35919], "Caisse d'épargne postale (Postsparkasse)": [48.209978, 16.380648], "Église Am Steinhof": [48.210384, 16.278411], "Zacherlhaus": [48.209904, 16.371627], "Looshaus": [48.208468, 16.366592], "American Bar (Loos Bar)": [48.207159, 16.369087], "Ankeruhr": [48.210761, 16.373675], "Karl-Marx-Hof": [48.25016, 16.364539], "Werkbundsiedlung": [48.179905, 16.269496], "Hochhaus Herrengasse": [48.209126, 16.36662], "Église de la Sainte-Trinité (Wotrubakirche)": [48.147633, 16.253453], "Hundertwasserhaus": [48.207384, 16.393941], "Haas-Haus": [48.208365, 16.371556], "Usine d'incinération de Spittelau": [48.233473, 16.359925], "Gazomètres de Simmering": [48.185143, 16.418406], "MuseumsQuartier": [48.203183, 16.358346], "Campus WU – Library & Learning Center": [48.212874, 16.407666], "DC Tower 1": [48.231892, 16.412702], "Parc du château de Schönbrunn et Gloriette": [48.178267, 16.308726], "Jardins du Belvedere": [48.192036, 16.383058], "Burggarten et Palmenhaus": [48.2043, 16.3663], "Volksgarten": [48.208035, 16.361787], "Stadtpark": [48.202886, 16.379724], "Augarten": [48.224447, 16.377711], "Prater et Hauptallee": [48.208866, 16.405268], "Lainzer Tiergarten": [48.176659, 16.220236], "Kahlenberg et Leopoldsberg (Stadtwanderweg 1)": [48.276342, 16.333068], "Nussberg et vignes de Nussdorf": [48.268675, 16.343822], "Cobenzl": [48.267005, 16.31435], "Steinhofgründe": [48.214172, 16.276915], "Donauinsel": [48.226611, 16.412238], "Alte Donau": [48.238271, 16.424773], "Parc national Donau-Auen (Lobau)": [48.168579, 16.534989], "Türkenschanzpark": [48.235481, 16.333815], "Jardin botanique de l'Université": [48.195106, 16.383722], "Setagaya Park": [48.245561, 16.35661], "Donaukanal": [48.199964, 16.408192], "Kurpark Oberlaa": [48.146922, 16.40001], "Opéra d'État de Vienne (Wiener Staatsoper)": [48.203286, 16.369194], "Konzerthaus": [48.200649, 16.377613], "Volksoper Wien": [48.224668, 16.350235], "MusikTheater an der Wien": [48.199427, 16.364241], "Theater in der Josefstadt": [48.209783, 16.351024], "Raimund Theater": [48.192197, 16.339917], "Wiener Sängerknaben – Hofburgkapelle": [48.220045, 16.380037], "École d'équitation espagnole (Spanische Hofreitschule)": [48.207307, 16.366707], "Kursalon Wien": [48.203375, 16.37801], "Mozarthaus Vienna – concerts": [48.208218, 16.374933], "Porgy & Bess": [48.206801, 16.376589]};
+
+const DSTEPS = [0.5, 1, 1.5, 2, 3, 4, 5, Infinity];
+const loc = { here: null, di: 7, near: false };
+try { Object.assign(loc, JSON.parse(localStorage.getItem("vienne-position") || "{}")); } catch (e) {}
+function saveLoc() { try { localStorage.setItem("vienne-position", JSON.stringify(loc)); } catch (e) {} }
+function walkKm(r) {
+  const c = COORDS[r.name]; if (!loc.here || !c) return null;
+  const R = 6371, t = Math.PI / 180, dLa = (c[0] - loc.here.lat) * t, dLo = (c[1] - loc.here.lon) * t;
+  const a = Math.sin(dLa / 2) ** 2 + Math.cos(loc.here.lat * t) * Math.cos(c[0] * t) * Math.sin(dLo / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a)) * 1.3;
+}
+const dmax = () => DSTEPS[loc.di];
+function farOut(r) { if (!loc.here || !isFinite(dmax())) return false; const d = walkKm(r); return d == null || d > dmax(); }
+function fmtWalk(d) { const m = Math.max(1, Math.round(d / 4.8 * 60)); return `≈ ${m < 60 ? m + " min" : Math.floor(m / 60) + " h " + String(m % 60).padStart(2, "0")} à pied (${d < 0.95 ? Math.round(d * 10) * 100 + " m" : String(Math.round(d * 10) / 10).replace(".", ",") + " km"})`; }
+function distLine(r) { const d = walkKm(r); return d == null ? "" : `<p class="pline"><span class="k">Distance</span>${fmtWalk(d)}</p>`; }
+const nearSort = (a, b) => nz(walkKm(a), 1e9) - nz(walkKm(b), 1e9);
+function locHtml(other) {
+  const h = loc.here, lim = isFinite(dmax()) ? fmtWalk(dmax()).replace(/^≈ /, "") : "sans limite";
+  return `<div class="lbl">Où êtes-vous ?</div>
+  <div class="row2"><button type="button" class="quick" id="lgps">Me localiser</button></div>
+  <div class="row2"><input type="search" id="laddr" placeholder="ou une adresse (hôtel…)" aria-label="Adresse"><button type="button" class="quick ghost" id="lgo">OK</button></div>
+  <p class="locst" id="lst">${h ? `Position : ${esc(h.label)}<button type="button" class="quick ghost" id="lclr">Effacer</button>` : "Indiquez une position pour filtrer par distance."}</p>
+  ${h ? `<input type="range" id="ldist" min="0" max="7" step="1" value="${loc.di}" aria-label="Distance maximale">
+  <div class="budget-read"><span>à moins de</span><strong id="ldv">${lim}</strong></div>
+  ${other ? `<label class="chk"><input type="checkbox" id="lnear" ${loc.near ? "checked" : ""}> Du plus proche au plus loin</label>` : ""}` : ""}`;
+}
+function rerenderAll() { if (curTab === "restaurants") { drawLoc(); render(); } else { $("oside").innerHTML = OT[curTab][0](); bindOther(); renderOther(); } }
+function setHere(lat, lon, label) { loc.here = { lat, lon, label }; saveLoc(); rerenderAll(); }
+function bindLoc() {
+  const on = (id, ev, f) => { const e = $(id); if (e) e.addEventListener(ev, f); };
+  on("lgps", "click", () => {
+    if (!navigator.geolocation) { $("lst").textContent = "La localisation n'est pas disponible sur cet appareil."; return; }
+    $("lst").textContent = "Recherche de votre position…";
+    navigator.geolocation.getCurrentPosition((p) => setHere(p.coords.latitude, p.coords.longitude, "votre position actuelle"),
+      () => { $("lst").textContent = "Position refusée ou introuvable. Essayez avec une adresse."; }, { enableHighAccuracy: true, timeout: 15000 });
+  });
+  const go = async () => {
+    const q = $("laddr").value.trim(); if (!q) return;
+    $("lst").textContent = "Recherche de l'adresse…";
+    try {
+      const r = await (await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=at&q=" + encodeURIComponent(/wien|vienn/i.test(q) ? q : q + ", Wien"))).json();
+      if (!r.length) { $("lst").textContent = "Adresse introuvable. Précisez la rue et le numéro."; return; }
+      setHere(+r[0].lat, +r[0].lon, q);
+    } catch (e) { $("lst").textContent = "Recherche impossible pour le moment (connexion ?)."; }
+  };
+  on("lgo", "click", go); on("laddr", "keydown", (e) => { if (e.key === "Enter") go(); });
+  on("lclr", "click", () => { loc.here = null; if (st.sort === "pr") st.sort = "qu"; saveLoc(); rerenderAll(); });
+  on("ldist", "input", (e) => { loc.di = +e.target.value; saveLoc(); $("ldv").textContent = isFinite(dmax()) ? fmtWalk(dmax()).replace(/^≈ /, "") : "sans limite"; curTab === "restaurants" ? render() : renderOther(); });
+  on("lnear", "change", (e) => { loc.near = e.target.checked; saveLoc(); renderOther(); });
+}
+function drawLoc() { $("locR").innerHTML = locHtml(false); bindLoc(); }
 const MARGE = 5;
 const MISS = [["src", "Source non officielle"], ["acc", "Accord vins manquant"], ["px", "Prix manquant"]];
 const VEG_ANY = ["100 % végétal", "menu végétarien", "plats végétariens", "sur demande"];
@@ -411,6 +472,7 @@ function passes(r, opts = {}) {
     const hay = [r.name, r.quartier, r.cuisine, r.plat, r.gouter, r.adresse, r.menu, catLabel(r)].join(" ").toLowerCase();
     if (!st.q.toLowerCase().split(/\s+/).every((w) => hay.includes(w))) return false;
   }
+  if (farOut(r)) return false;
   if (!opts.noBudget) {
     const c = cost(r);
     
@@ -441,6 +503,7 @@ const SORTS = {
   sd: (a, b) => b.stars - a.stars || nz(cost(a).v, 1e9) - nz(cost(b).v, 1e9),
   sa: (a, b) => a.stars - b.stars || nz(cost(a).v, 1e9) - nz(cost(b).v, 1e9),
   nm: (a, b) => a.name.localeCompare(b.name, "de"),
+  pr: (a, b) => nearSort(a, b) || quality(b) - quality(a),
   bz: (a, b) => nz(a.bezirk, 99) - nz(b.bezirk, 99) || a.name.localeCompare(b.name, "de"),
   gm: (a, b) => nz((b.crit || {}).gm, -1) - nz((a.crit || {}).gm, -1),
   fs: (a, b) => nz((b.crit || {}).falstaff, -1) - nz((a.crit || {}).falstaff, -1),
@@ -496,6 +559,7 @@ function card(r, compact) {
   }
 
   const lines = [];
+  if (distLine(r)) lines.push(distLine(r));
   const pourquoi = r.gouter ? "à goûter : " + r.gouter : (r.cuisine ? "cuisine " + r.cuisine : "");
   if (!compact && pourquoi) lines.push(`<p class="why"><span class="k">Pourquoi y aller</span>${esc(gloss(pourquoi))}</p>`);
   if (r.sansViande) lines.push(`<p class="why"><span class="k">Sans viande</span>${esc(r.sansViande)}</p>`);
@@ -671,7 +735,7 @@ function footHtml(r) {
 function cardO(r, right, middle, lines, tags) {
   return `<article class="card${r.closed ? " closed" : ""}"><div class="top"><div style="min-width:0"><h3 class="name">${esc(r.name)}</h3>
     <div class="sub">${esc([r.quartier, r.type || r.genre].filter(Boolean).join(" · "))}</div>${tags.length ? `<div class="tags">${tags.join("")}</div>` : ""}</div>
-    <div class="qual">${right}</div></div>${middle}<div class="body">${lines.filter(Boolean).join("")}</div>${footHtml(r)}</article>`;
+    <div class="qual">${right}</div></div>${middle}<div class="body">${[distLine(r), ...lines].filter(Boolean).join("")}</div>${footHtml(r)}</article>`;
 }
 const L = (k, v) => v ? `<p><span class="k">${k}</span>${esc(v)}</p>` : "";
 
@@ -771,9 +835,12 @@ const OT = {
 };
 function renderOther() {
   const [, list, unit, meth] = OT[curTab];
-  const [rows, html] = list();
+  let [rows, html] = list();
+  let z = rows.map((r, i) => [r, html[i]]).filter(([r]) => !farOut(r));
+  if (loc.here && loc.near) z.sort((a, b) => nearSort(a[0], b[0]));
+  rows = z.map((x) => x[0]); html = z.map((x) => x[1]);
   $("olist").innerHTML = html.length ? html.join("") : `<div class="empty">Aucun résultat. Retirez un filtre.</div>`;
-  $("ocount").innerHTML = `<b>${rows.length}</b> ${unit}${rows.length > 1 ? "s" : ""}`;
+  $("ocount").innerHTML = `<b>${rows.length}</b> ${rows.length > 1 ? (unit === "lieu" ? "lieux" : unit + "s") : unit}`;
   $("omethod").innerHTML = `<h2>Comment lire cet onglet</h2><p>${esc(meth)}</p>`;
 }
 function bindOther() {
@@ -804,7 +871,10 @@ function showTab() {
   $("heye").textContent = hd[1]; $("hlede").textContent = hd[2];
   $("oside").innerHTML = OT[curTab][0](); bindOther(); renderOther();
 }
+const _bo = bindOther;
+bindOther = function () { const b = document.createElement("div"); b.className = "box locbox"; b.innerHTML = locHtml(true); $("oside").prepend(b); bindLoc(); _bo(); };
 window.addEventListener("hashchange", () => { showTab(); window.scrollTo(0, 0); });
+drawLoc();
 showTab();
 </script>
 
