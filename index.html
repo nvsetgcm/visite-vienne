@@ -69,6 +69,7 @@ aside.panel { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 56px);
 .quick.ghost { background: transparent; border-color: var(--line); }
 label.chk { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; }
 label.chk input { margin-top: 3px; accent-color: var(--loden); }
+.budgetnote { font-size: 13px; font-style: italic; line-height: 1.4; color: var(--muted); margin: 4px 0 10px; }
 .catnote { font-size: 13.5px; line-height: 1.45; color: var(--muted); margin: 10px 0 0; }
 label.chk.sub { padding-left: 24px; color: var(--muted); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -214,6 +215,7 @@ p.groupnote { margin: 0 0 12px; font-family: var(--ui); font-size: 13.5px; color
 
       <div class="box">
         <div class="lbl">Budget</div>
+        <p class="budgetnote" id="bnote"></p>
         <div class="row">
           <div class="seg" role="group" aria-label="Unité">
             <button type="button" id="u1" aria-pressed="true">Par personne</button>
@@ -305,6 +307,12 @@ const CATS = [
   ["heuriger", "Guinguettes à vin (Heurigen)"], ["abordable", "Cuisine du monde"], ["veg", "Végétarien & végétal"], ["bib", "Bib Gourmand"],
   ["selection", "Sélection Michelin"], ["etoile", "Étoilés"]
 ];
+(function () {
+  const v = DATA.filter((r) => r.cat === "beisl" && !r.closed && r.prix).map((r) => r.prix).sort((a, b) => a - b);
+  if (v.length < 5) return;
+  const q = (f) => Math.round(v[Math.floor(f * (v.length - 1))]);
+  document.getElementById("bnote").textContent = `Repère : dans un bistrot viennois (Beisl, Gasthaus), un dîner soupe, plat et dessert coûte en général de ${q(0.25)} à ${q(0.75)} € par personne, le plus souvent autour de ${q(0.5)} €, hors boissons et couvert.`;
+})();
 const MISS = [["src", "Source non officielle"], ["acc", "Accord vins manquant"], ["px", "Prix manquant"]];
 const VEG_ANY = ["100 % végétal", "menu végétarien", "plats végétariens", "sur demande"];
 const VEG_DED = ["100 % végétal", "menu végétarien"];
