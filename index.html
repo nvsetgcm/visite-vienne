@@ -311,7 +311,12 @@ const CATS = [
   const v = DATA.filter((r) => r.cat === "beisl" && !r.closed && r.prix).map((r) => r.prix).sort((a, b) => a - b);
   if (v.length < 5) return;
   const q = (f) => Math.round(v[Math.floor(f * (v.length - 1))]);
-  document.getElementById("bnote").textContent = `Repère : dans un bistrot viennois (Beisl, Gasthaus), un dîner soupe, plat et dessert coûte en général de ${q(0.25)} à ${q(0.75)} € par personne, le plus souvent autour de ${q(0.5)} €, hors boissons et couvert.`;
+  const pl = DATA.filter((r) => r.cat === "beisl" && !r.closed && r.prixPlat).map((r) => r.prixPlat).sort((a, b) => a - b);
+  const plat = pl.length >= 5 ? Math.round(pl[Math.floor((pl.length - 1) / 2)]) : null;
+  document.getElementById("bnote").textContent = `Repère : dans un bistrot viennois (Beisl, Gasthaus), un dîner soupe, plat et dessert coûte en général de ${q(0.25)} à ${q(0.75)} € par personne, le plus souvent autour de ${q(0.5)} €, hors boissons et couvert.`
+    + (plat ? ` Le plat phare, souvent le Wiener Schnitzel, compte pour l'essentiel : autour de ${plat} €.` : "")
+    + ` Ajoutez un verre de vin ou une bière (4 à 6 €), parfois le couvert (Gedeck, pain et beurre, 2 à 5 €) et un pourboire de 5 à 10 % : on annonce au serveur le montant arrondi en payant, plutôt que de laisser des pièces sur la table.`
+    + ` Les maisons historiques et les tables étoilées coûtent davantage ; elles figurent ici quand elles valent leur prix.`;
 })();
 const MISS = [["src", "Source non officielle"], ["acc", "Accord vins manquant"], ["px", "Prix manquant"]];
 const VEG_ANY = ["100 % végétal", "menu végétarien", "plats végétariens", "sur demande"];
