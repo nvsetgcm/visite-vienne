@@ -620,7 +620,7 @@ const HEAD = {
   parcs: ["Wien · parcs et paysages", "Parcs et paysages", "Jardins impériaux, collines de vignes et bords du Danube, avec la durée d'une promenade, les meilleurs mois et ce qui reste ouvert en novembre."],
   culture: ["Wien · novembre 2026", "La culture en novembre", "Opéra, concerts, théâtre et musique sacrée : les salles de Vienne et leurs temps forts de novembre 2026, relevés sur les programmes officiels quand ils sont publiés."],
 };
-const ost = { musees: { t: 300, day: "", type: "", q: "" }, architecture: { per: [], acc: "", q: "" }, parcs: { m: 999, nov: false, q: "" }, culture: { q: "" } };
+const ost = { musees: { t: 300, tc: 300, day: "", type: "", q: "" }, architecture: { per: [], acc: "", q: "" }, parcs: { m: 999, nov: false, q: "" }, culture: { q: "" } };
 let curTab = "restaurants", restHead = null;
 const fmtMin = (m) => m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? String(m % 60).padStart(2, "0") : ""}` : `${m} min`;
 const PERIODS = [["med", "Roman et gothique", 0, 1499], ["bar", "Renaissance et baroque", 1500, 1799], ["ring", "Ringstrasse et historicisme", 1800, 1896], ["jug", "Sécession et modernisme", 1897, 1918], ["rot", "Vienne rouge et entre-deux-guerres", 1919, 1945], ["con", "Après-guerre et contemporain", 1946, 2100]];
@@ -639,16 +639,19 @@ const L = (k, v) => v ? `<p><span class="k">${k}</span>${esc(v)}</p>` : "";
 
 function sideMusees() {
   const types = [...new Set(TABS.musees.map((m) => m.type))].sort();
+  const lim = (t) => t >= 300 ? "sans limite" : fmtMin(t) + " ou moins";
   return `<div class="box"><div class="lbl">Temps disponible</div>
-    <input type="range" id="mt" min="30" max="300" step="15" value="${ost.musees.t}" aria-label="Temps disponible" style="width:100%;accent-color:var(--loden)">
-    <div class="budget-read"><span>l'essentiel en</span><strong id="mtv">${ost.musees.t >= 300 ? "sans limite" : fmtMin(ost.musees.t) + " ou moins"}</strong></div></div>
+    <input type="range" id="mt" min="30" max="300" step="15" value="${ost.musees.t}" aria-label="Temps pour l'essentiel" style="width:100%;accent-color:var(--loden)">
+    <div class="budget-read"><span>l'essentiel en</span><strong id="mtv">${lim(ost.musees.t)}</strong></div>
+    <input type="range" id="mtc" min="30" max="300" step="15" value="${ost.musees.tc}" aria-label="Temps pour tout voir" style="width:100%;accent-color:var(--loden);margin-top:12px">
+    <div class="budget-read"><span>tout voir en</span><strong id="mtcv">${lim(ost.musees.tc)}</strong></div></div>
   <div class="box"><div class="lbl">Jour de visite</div><select id="mday"><option value="">Peu importe</option>${DAYS.map((d, i) => `<option value="${i}" ${ost.musees.day === String(i) ? "selected" : ""}>${["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"][i]}</option>`).join("")}</select>
   <div class="lbl">Genre</div><select id="mtype"><option value="">Tous</option>${types.map((t) => `<option ${ost.musees.type === t ? "selected" : ""}>${esc(t)}</option>`).join("")}</select>
   <input type="search" id="oq" placeholder="Nom, collection, quartier…" value="${esc(ost.musees.q)}" aria-label="Rechercher"></div>`;
 }
 function listMusees() {
   const s = ost.musees;
-  const rows = TABS.musees.filter((m) => (s.t >= 300 || m.ess <= s.t) && (!s.type || m.type === s.type) && (s.day === "" || m.horaires[+s.day] !== "fermé") && hit(m, s.q))
+  const rows = TABS.musees.filter((m) => (s.t >= 300 || m.ess <= s.t) && (s.tc >= 300 || m.comp <= s.tc) && (!s.type || m.type === s.type) && (s.day === "" || m.horaires[+s.day] !== "fermé") && hit(m, s.q))
 ;
   return [rows, rows.map((m) => {
     const ew = m.ess / 300 * 100, cw = Math.max(0, (m.comp - m.ess) / 300 * 100);
@@ -723,7 +726,9 @@ function renderOther() {
 function bindOther() {
   const on = (id, ev, f) => { const e = $(id); if (e) e.addEventListener(ev, f); };
   on("oq", "input", (e) => { ost[curTab].q = e.target.value.trim(); renderOther(); });
-  on("mt", "input", (e) => { ost.musees.t = +e.target.value; $("mtv").textContent = ost.musees.t >= 300 ? "sans limite" : fmtMin(ost.musees.t) + " ou moins"; renderOther(); });
+  const limT = (t) => t >= 300 ? "sans limite" : fmtMin(t) + " ou moins";
+  on("mt", "input", (e) => { ost.musees.t = +e.target.value; $("mtv").textContent = limT(ost.musees.t); renderOther(); });
+  on("mtc", "input", (e) => { ost.musees.tc = +e.target.value; $("mtcv").textContent = limT(ost.musees.tc); renderOther(); });
   on("mday", "change", (e) => { ost.musees.day = e.target.value; renderOther(); });
   on("mtype", "change", (e) => { ost.musees.type = e.target.value; renderOther(); });
   on("aper", "click", (e) => { const b = e.target.closest("button"); if (!b) return; toggle(ost.architecture.per, b.dataset.k); b.setAttribute("aria-pressed", String(ost.architecture.per.includes(b.dataset.k))); renderOther(); });
