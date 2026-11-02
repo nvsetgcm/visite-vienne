@@ -315,7 +315,7 @@ const CATS = [
   const plat = pl.length >= 5 ? Math.round(pl[Math.floor((pl.length - 1) / 2)]) : null;
   document.getElementById("bnote").textContent = `Repère : dans un bistrot viennois (Beisl, Gasthaus), un dîner soupe, plat et dessert coûte en général de ${q(0.25)} à ${q(0.75)} € par personne, le plus souvent autour de ${q(0.5)} €`
     + (plat ? `, dont ≈ ${plat} € pour le plat (souvent un Wiener Schnitzel)` : "")
-    + `. Comptez en plus la boisson (4 à 6 €) et un pourboire de 5 à 10 %.`;
+    + `. Comptez en plus la boisson (4 à 6 €).`;
 })();
 const MISS = [["src", "Source non officielle"], ["acc", "Accord vins manquant"], ["px", "Prix manquant"]];
 const VEG_ANY = ["100 % végétal", "menu végétarien", "plats végétariens", "sur demande"];
