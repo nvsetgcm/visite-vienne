@@ -620,7 +620,7 @@ const HEAD = {
   parcs: ["Wien · parcs et paysages", "Parcs et paysages", "Jardins impériaux, collines de vignes et bords du Danube, avec la durée d'une promenade, les meilleurs mois et ce qui reste ouvert en novembre."],
   culture: ["Wien · novembre 2026", "La culture en novembre", "Opéra, concerts, théâtre et musique sacrée : les salles de Vienne et leurs temps forts de novembre 2026, relevés sur les programmes officiels quand ils sont publiés."],
 };
-const ost = { musees: { t: 300, tc: 300, day: "", type: "", q: "" }, architecture: { per: [], acc: "", q: "" }, parcs: { m: 999, nov: false, q: "" }, culture: { q: "" } };
+const ost = { musees: { t: 300, tc: 300, day: "", type: "", q: "" }, architecture: { per: [], acc: "", q: "" }, parcs: { m: 999, nov: false, q: "" }, culture: { q: "", d1: 1, d2: 30 } };
 let curTab = "restaurants", restHead = null;
 const fmtMin = (m) => m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? String(m % 60).padStart(2, "0") : ""}` : `${m} min`;
 const PERIODS = [["med", "Roman et gothique", 0, 1499], ["bar", "Renaissance et baroque", 1500, 1799], ["ring", "Ringstrasse et historicisme", 1800, 1896], ["jug", "Sécession et modernisme", 1897, 1918], ["rot", "Vienne rouge et entre-deux-guerres", 1919, 1945], ["con", "Après-guerre et contemporain", 1946, 2100]];
@@ -695,13 +695,28 @@ function listParcs() {
       [L("En novembre", p.novembre), L("À voir", p.aVoir), `<p class="pline"><span class="k">Entrée</span>${p.prix != null ? fmt(p.prix) : "gratuit"}</p>`], tags);
   })];
 }
+const JOURS = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
+const dayOpt = (sel) => Array.from({ length: 30 }, (_, i) => i + 1).map((d) => `<option value="${d}" ${d === sel ? "selected" : ""}>${JOURS[new Date(2026, 10, d).getDay()]} ${d} nov.</option>`).join("");
+
+function progDays(x) {
+  const m = x.match(/^((?:\d{1,2},\s*)*\d{1,2})\.11\b/);
+  if (m) return m[1].split(",").map((d) => +d);
+  if (/dimanche/i.test(x)) return Array.from({ length: 30 }, (_, i) => i + 1).filter((d) => new Date(2026, 10, d).getDay() === 0);
+  return null;
+}
 function sideCulture() {
-  return `<div class="box"><div class="lbl">Rechercher</div><input type="search" id="oq" placeholder="Salle, œuvre, compositeur…" value="${esc(ost.culture.q)}" aria-label="Rechercher">
-  <p class="groupnote" style="margin:0">Programme limité au 1er–30 novembre 2026. Les temps forts sont lus sur les programmes officiels ; une salle sans temps fort est à compléter.</p></div>`;
+  const s = ost.culture;
+  return `<div class="box"><div class="lbl">Dates de séjour</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><label>du<select id="cd1" aria-label="Du">${dayOpt(s.d1)}</select></label><label>au<select id="cd2" aria-label="Au">${dayOpt(s.d2)}</select></label></div></div>
+  <div class="box"><div class="lbl">Rechercher</div><input type="search" id="oq" placeholder="Salle, œuvre, compositeur…" value="${esc(ost.culture.q)}" aria-label="Rechercher">
+  <p class="groupnote" style="margin:0">Programme limité au 1er–30 novembre 2026. Les temps forts sont lus sur les programmes officiels ; une salle sans temps fort est à compléter. Dès que des dates sont choisies, seules les salles dont le programme est daté restent affichées.</p></div>`;
 }
 function listCulture() {
   const s = ost.culture;
-  const rows = TABS.culture.filter((c) => hit(c, s.q)).sort((a, b) => b.programme.length - a.programme.length);
+  const all = s.d1 === 1 && s.d2 === 30;
+  const keep = (x) => { const d = progDays(x); return all || d === null || d.some((j) => j >= s.d1 && j <= s.d2); };
+  const rows = TABS.culture.filter((c) => hit(c, s.q)).map((c) => ({ ...c, programme: c.programme.filter(keep) }))
+    .filter((c) => all || c.programme.length).sort((a, b) => b.programme.length - a.programme.length);
   return [rows, rows.map((c) => {
     let g = "";
     if (c.pmin != null && c.pmax != null) g = `<div class="gauge" style="height:6px;opacity:1" title="Fourchette de prix"><div class="m" style="left:${c.pmin / 300 * 100}%;width:${Math.max(1, (c.pmax - c.pmin) / 300 * 100)}%"></div></div>`;
@@ -725,6 +740,8 @@ function renderOther() {
 }
 function bindOther() {
   const on = (id, ev, f) => { const e = $(id); if (e) e.addEventListener(ev, f); };
+  const cd = (w) => (e) => { const c = ost.culture; c[w] = +e.target.value; if (c.d1 > c.d2) { if (w === "d1") c.d2 = c.d1; else c.d1 = c.d2; $("cd1").value = c.d1; $("cd2").value = c.d2; } renderOther(); };
+  on("cd1", "change", cd("d1")); on("cd2", "change", cd("d2"));
   on("oq", "input", (e) => { ost[curTab].q = e.target.value.trim(); renderOther(); });
   const limT = (t) => t >= 300 ? "sans limite" : fmtMin(t) + " ou moins";
   on("mt", "input", (e) => { ost.musees.t = +e.target.value; $("mtv").textContent = limT(ost.musees.t); renderOther(); });
