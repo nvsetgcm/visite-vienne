@@ -130,6 +130,7 @@ nav.tabs { background: var(--surface); border-bottom: 1px solid var(--line); pos
 .gauge.over { outline: 2px solid var(--red); outline-offset: 1px; }
 .body { display: grid; gap: 6px; font-size: 14.5px; }
 .body p { margin: 0; }
+.body p.why { font-size: 15.5px; }
 .k { font-family: var(--display); text-transform: uppercase; letter-spacing: .1em; font-size: 11px; font-weight: 600; color: var(--muted); margin-right: 6px; }
 .foot { border-top: 1px dashed var(--line); padding-top: 8px; display: grid; gap: 3px; font-family: var(--ui); font-size: 12.5px; color: var(--muted); }
 .foot a { color: var(--muted); }
@@ -214,7 +215,14 @@ p.groupnote { margin: 0 0 12px; font-family: var(--ui); font-size: 13.5px; color
       </div>
 
       <div class="box">
-        <div class="lbl">Budget</div>
+        <div class="lbl">Genre de table</div>
+        <div class="chips" id="fcat"></div>
+        <p class="catnote"><strong>Bistrot viennois</strong> : en allemand <em>Beisl</em> (bistrot de quartier) ou <em>Gasthaus</em> (auberge). Salle simple, service sans façon et la cuisine viennoise de tous les jours : le meilleur endroit pour la découvrir.<br><strong>Guinguette à vin</strong> (<em>Heuriger</em>, pluriel <em>Heurigen</em>) : taverne de vigneron aux portes de la ville, vin de l'année et buffet froid.</p>
+        <label class="chk"><input type="checkbox" id="mixstars"> Mêler les étoilés à la liste principale</label>
+      </div>
+
+      <div class="box">
+        <div class="lbl">Prix approximatifs</div>
         <p class="budgetnote" id="bnote"></p>
         <div class="row">
           <div class="seg" role="group" aria-label="Unité">
@@ -236,17 +244,10 @@ p.groupnote { margin: 0 0 12px; font-family: var(--ui); font-size: 13.5px; color
         </div>
         <div class="budget-read"><span>de <strong id="vmin"></strong></span><span>à <strong id="vmax"></strong></span></div>
         <div class="row">
-          <button type="button" class="quick ghost" id="qall">Réinitialiser le budget</button>
+          <button type="button" class="quick ghost" id="qall">Réinitialiser les prix</button>
         </div>
         <label class="chk"><input type="checkbox" id="wine"> Inclure l'accord mets et vins dans le calcul</label>
         <label class="chk sub"><input type="checkbox" id="winekeep" checked> Garder les tables dont l'accord n'est pas publié (comptées au prix du repas seul, marquées ≥)</label>
-      </div>
-
-      <div class="box">
-        <div class="lbl">Genre de table</div>
-        <div class="chips" id="fcat"></div>
-        <p class="catnote"><strong>Bistrot viennois</strong> : en allemand <em>Beisl</em> (bistrot de quartier) ou <em>Gasthaus</em> (auberge). Salle simple, service sans façon et la cuisine viennoise de tous les jours : le meilleur endroit pour la découvrir.<br><strong>Guinguette à vin</strong> (<em>Heuriger</em>, pluriel <em>Heurigen</em>) : taverne de vigneron aux portes de la ville, vin de l'année et buffet froid.</p>
-        <label class="chk"><input type="checkbox" id="mixstars"> Mêler les étoilés à la liste principale</label>
       </div>
 
       <div class="box">
@@ -460,13 +461,14 @@ function card(r, compact) {
   }
 
   const lines = [];
+  const pourquoi = r.gouter ? "à goûter : " + r.gouter : (r.cuisine ? "cuisine " + r.cuisine : "");
+  if (!compact && pourquoi) lines.push(`<p class="why"><span class="k">Pourquoi y aller</span>${esc(pourquoi)}</p>`);
+  if (!compact && r.histoire) lines.push(`<p><span class="k">Histoire</span>${esc(r.histoire)}</p>`);
+  if (r.plat) lines.push(`<p><span class="k">Plat phare</span>${esc(r.plat)}${r.prixPlat != null ? ` · ${fmt(r.prixPlat)}` : ""}</p>`);
   lines.push(`<p class="pline"><span class="k">Prix</span>${esc(priceTxt)}</p>`);
   if (r.est) lines.push(`<p class="pline">${esc(r.estNote)}</p>`);
   if (r.menu || r.detail) lines.push(`<p><span class="k">${r.formule === "menu" ? "Menu retenu" : "Calcul"}</span>${esc([r.menu, r.detail].filter(Boolean).join(" — "))}</p>`);
-  if (r.plat) lines.push(`<p><span class="k">Plat phare</span>${esc(r.plat)}${r.prixPlat != null ? ` · ${fmt(r.prixPlat)}` : ""}</p>`);
-  if (!compact && r.gouter) lines.push(`<p><span class="k">À goûter</span>${esc(r.gouter)}</p>`);
   if (r.autres) lines.push(`<p><span class="k">Autres menus</span>${esc(r.autres)}</p>`);
-  if (!compact && r.histoire) lines.push(`<p><span class="k">Histoire</span>${esc(r.histoire)}</p>`);
   if (r.remarques) lines.push(`<p><span class="k">À savoir</span>${esc(r.remarques)}</p>`);
 
   const foot = [];
