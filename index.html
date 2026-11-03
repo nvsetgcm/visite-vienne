@@ -301,7 +301,7 @@ p.groupnote { margin: 0 0 12px; font-family: var(--ui); font-size: 13.5px; color
         <h3>L'ordre de la liste</h3>
         <p>Par défaut, les adresses sont classées par recommandation : la moyenne des critiques disponibles (points Falstaff, note Gault&amp;Millau, note Tripadvisor quand elle repose sur au moins 20 avis, pondérée par leur nombre), plus un petit bonus pour une distinction Michelin et pour chaque guide qui cite l'adresse. Une adresse sans aucune note se place au milieu. Le curseur de prix ne fait que filtrer ; il ne change pas l'ordre.</p>
         <h3>La distance</h3>
-        <p>Après avoir indiqué votre position (« Me localiser ») ou une adresse, chaque fiche affiche le temps à pied estimé : distance à vol d'oiseau majorée de 30 % pour suivre les rues, à 4,8 km/h. Les transports en commun ne sont pas pris en compte. La station indiquée est la plus proche (métro, ou tram et bus), d'après les données ouvertes des Wiener Linien ; son nom ouvre sa fiche Google Maps. Les numéros de téléphone viennent d'OpenStreetMap. Les horaires d'ouverture viennent d'OpenStreetMap (ou du site officiel quand c'est précisé) : en doré, les soirs où l'on sert après 22 h ; ils changent souvent, vérifiez avant de vous déplacer. La position reste dans votre navigateur ; une adresse tapée est envoyée au service de cartes OpenStreetMap pour être localisée.</p>
+        <p>Après avoir indiqué votre position (« Me localiser ») ou une adresse, chaque fiche affiche le temps à pied estimé (distance à vol d'oiseau majorée de 30 % pour suivre les rues, à 4,8 km/h) ; au-delà de 20 minutes de marche, elle propose plutôt l'itinéraire en transports sur Google Maps. Les transports en commun ne sont pas pris en compte. La station indiquée est la plus proche (métro, ou tram et bus), d'après les données ouvertes des Wiener Linien ; son nom ouvre sa fiche Google Maps. Les numéros de téléphone viennent d'OpenStreetMap. Les horaires d'ouverture viennent d'OpenStreetMap (ou du site officiel quand c'est précisé) : en doré, les soirs où l'on sert après 22 h ; ils changent souvent, vérifiez avant de vous déplacer. La position reste dans votre navigateur ; une adresse tapée est envoyée au service de cartes OpenStreetMap pour être localisée.</p>
         <h3>Le prix retenu</h3>
         <p>Pour chaque adresse, le prix d'un dîner par personne, hors boissons. Quand la maison sert un menu le soir, c'est le menu complet du soir le moins cher (les menus plus longs sont cités dans la fiche). Quand elle sert à la carte, c'est un dîner type : une soupe (ou l'entrée la moins chère), le plat phare et le dessert le moins cher. Le plat phare est le Wiener Schnitzel de veau quand il existe, sinon la spécialité de la maison. Le mode « Plat phare seul » ne compte que ce plat.</p>
         <h3>Fiabilité</h3>
@@ -7571,11 +7571,20 @@ function walkKm(r) {
 }
 const dmax = () => DSTEPS[loc.di];
 function farOut(r) { if (!loc.here || !isFinite(dmax())) return false; const d = walkKm(r); return d == null || d > dmax(); }
-function fmtWalk(d) { const m = Math.max(1, Math.round(d / 4.8 * 60)); return `≈ ${m < 60 ? m + " min" : Math.floor(m / 60) + " h " + String(m % 60).padStart(2, "0")} à pied (${d < 0.95 ? Math.round(d * 10) * 100 + " m" : String(Math.round(d * 10) / 10).replace(".", ",") + " km"})`; }
-function distLine(r) { const d = walkKm(r); return d == null ? "" : `<p class="pline"><span class="k">Distance</span>${fmtWalk(d)}</p>`; }
+function fmtKm(d) { return d < 0.95 ? Math.round(d * 10) * 100 + " m" : String(Math.round(d * 10) / 10).replace(".", ",") + " km"; }
+function walkMin(d) { return Math.max(1, Math.round(d / 4.8 * 60)); }
+function fmtWalk(d) { return `≈ ${walkMin(d)} min à pied (${fmtKm(d)})`; }
+
+function fmtLim(d) { return walkMin(d) <= 20 ? `${fmtKm(d)} (≈ ${walkMin(d)} min à pied)` : fmtKm(d); }
+function distLine(r) {
+  const d = walkKm(r); if (d == null) return "";
+  if (walkMin(d) <= 20) return `<p class="pline"><span class="k">Distance</span>${fmtWalk(d)}</p>`;
+  const c = COORDS[r.name], u = `https://www.google.com/maps/dir/?api=1&origin=${loc.here.lat},${loc.here.lon}&destination=${c[0]},${c[1]}&travelmode=transit`;
+  return `<p class="pline"><span class="k">Distance</span>${fmtKm(d)} — plutôt en transports : <a href="${u}" target="_blank" rel="noopener">itinéraire</a></p>`;
+}
 const nearSort = (a, b) => nz(walkKm(a), 1e9) - nz(walkKm(b), 1e9);
 function locHtml(other) {
-  const h = loc.here, lim = isFinite(dmax()) ? fmtWalk(dmax()).replace(/^≈ /, "") : "sans limite";
+  const h = loc.here, lim = isFinite(dmax()) ? fmtLim(dmax()) : "sans limite";
   return `<div class="lbl">Où êtes-vous ?</div>
   <div class="row2"><button type="button" class="quick" id="lgps">Me localiser</button></div>
   <div class="row2"><div class="addr"><input type="search" id="laddr" placeholder="ou une adresse (hôtel…)" aria-label="Adresse" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="lsug" aria-expanded="false"><ul class="sugg" id="lsug" role="listbox" hidden></ul></div><button type="button" class="quick ghost" id="lgo">OK</button></div>
@@ -7660,7 +7669,7 @@ function bindLoc() {
   on("lgo", "click", () => { hide(); go(); });
   on("laddr", "keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); if (items.length) pick(items[0]); else go(); } if (e.key === "Escape") hide(); });
   on("lclr", "click", () => { loc.here = null; if (st.sort === "pr") st.sort = "qu"; saveLoc(); rerenderAll(); });
-  on("ldist", "input", (e) => { loc.di = +e.target.value; saveLoc(); $("ldv").textContent = isFinite(dmax()) ? fmtWalk(dmax()).replace(/^≈ /, "") : "sans limite"; curTab === "restaurants" ? render() : renderOther(); });
+  on("ldist", "input", (e) => { loc.di = +e.target.value; saveLoc(); $("ldv").textContent = isFinite(dmax()) ? fmtLim(dmax()) : "sans limite"; curTab === "restaurants" ? render() : renderOther(); });
   on("lnear", "change", (e) => { loc.near = e.target.checked; saveLoc(); renderOther(); });
 }
 function drawLoc() { $("locR").innerHTML = locHtml(false); bindLoc(); }
