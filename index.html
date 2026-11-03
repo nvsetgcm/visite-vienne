@@ -7595,10 +7595,10 @@ function locHtml(other) {
 }
 function rerenderAll() { if (curTab === "restaurants") { drawLoc(); render(); } else { $("oside").innerHTML = OT[curTab][0](); bindOther(); renderOther(); } }
 function setHere(lat, lon, label) {
-  loc.here = { lat, lon, label }; loc.near = true;
+  loc.here = { lat, lon, label };
   if (loc.di === 7) loc.di = 3;  
-  st.sort = "pr"; const so = $("sort"); if (so) so.value = "pr"; save(); saveLoc(); rerenderAll();
-  const m = $("lst"); if (m) { m.insertAdjacentHTML("beforeend", `<br><b>Position trouvée</b> : liste triée du plus proche au plus loin.`); }
+  saveLoc(); rerenderAll();
+  const m = $("lst"); if (m) { m.insertAdjacentHTML("beforeend", `<br><b>Position trouvée</b> : adresses à moins de ${fmtKm(dmax())}, toujours classées par recommandation (tri « Les plus proches » disponible).`); }
 }
 function bindLoc() {
   const on = (id, ev, f) => { const e = $(id); if (e) e.addEventListener(ev, f); };
