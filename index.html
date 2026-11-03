@@ -7126,14 +7126,30 @@ function bindLoc() {
     navigator.geolocation.getCurrentPosition((p) => setHere(p.coords.latitude, p.coords.longitude, "votre position actuelle"),
       () => { $("lst").textContent = "Position refusée ou introuvable. Essayez avec une adresse."; }, { enableHighAccuracy: true, timeout: 15000 });
   });
+  
+  const inVienna = (la, lo) => la > 48.10 && la < 48.34 && lo > 16.17 && lo < 16.59;
+  async function geocode(q) {
+    const qq = /wien|vienn/i.test(q) ? q : q + ", Wien";
+    try {
+      const r = await (await fetch("https://photon.komoot.io/api/?limit=5&lat=48.2082&lon=16.3738&q=" + encodeURIComponent(qq))).json();
+      const f = (r.features || []).find((x) => inVienna(x.geometry.coordinates[1], x.geometry.coordinates[0]));
+      if (f) return [f.geometry.coordinates[1], f.geometry.coordinates[0]];
+    } catch (e) {}
+    try {
+      const r = await (await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=3&countrycodes=at&q=" + encodeURIComponent(qq))).json();
+      const f = r.find((x) => inVienna(+x.lat, +x.lon));
+      if (f) return [+f.lat, +f.lon];
+      return null;
+    } catch (e) { return undefined; }
+  }
   const go = async () => {
     const q = $("laddr").value.trim(); if (!q) return;
+    $("laddr").blur();
     $("lst").textContent = "Recherche de l'adresse…";
-    try {
-      const r = await (await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=at&q=" + encodeURIComponent(/wien|vienn/i.test(q) ? q : q + ", Wien"))).json();
-      if (!r.length) { $("lst").textContent = "Adresse introuvable. Précisez la rue et le numéro."; return; }
-      setHere(+r[0].lat, +r[0].lon, q);
-    } catch (e) { $("lst").textContent = "Recherche impossible pour le moment (connexion ?)."; }
+    const g = await geocode(q);
+    if (g === undefined) { $("lst").textContent = "Recherche impossible pour le moment (connexion ?). Réessayez dans un instant."; return; }
+    if (!g) { $("lst").textContent = "Adresse introuvable à Vienne. Précisez la rue et le numéro (ex. « Kärntner Ring 1 »)."; return; }
+    setHere(g[0], g[1], q);
   };
   on("lgo", "click", go); on("laddr", "keydown", (e) => { if (e.key === "Enter") go(); });
   on("lclr", "click", () => { loc.here = null; if (st.sort === "pr") st.sort = "qu"; saveLoc(); rerenderAll(); });
